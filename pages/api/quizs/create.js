@@ -8,5 +8,6 @@ import cookie from 'cookie';
     let quiz = new Quiz(data)
     await quiz.save()
     console.log(data)
+    return res.json({message:"Create quizz successfully"});
 }
 export default connectDB(signIn);

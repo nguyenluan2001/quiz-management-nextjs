@@ -1,7 +1,7 @@
 import { createSlice, current } from "@reduxjs/toolkit";
 const initId = Math.floor(Math.random() * 100)
 const initialState = {
-    quizTitle: "Untitled Quiz",
+    title: "Untitled Quiz",
     listQuestions: [
         // {
         //     id: initId,
@@ -59,6 +59,14 @@ const quizSlice = createSlice({
     name: "quiz",
     initialState: initialState,
     reducers: {
+        resetQuizz:(state) => {
+            return initialState;
+        },
+        getQuizz: (state, action) =>{
+            let {title, listQuestions} = action.payload;
+            state.title = title,
+            state.listQuestions = listQuestions;
+        },
         updateQuizTitle: (state, action) => {
             let title = action.payload;
             state.title = title;
@@ -217,7 +225,10 @@ const quizSlice = createSlice({
         }
     }
 })
-export const { createQuiz,
+export const { 
+    resetQuizz,
+    getQuizz,
+    createQuiz,
     updateTitleCurrentQuestion,
     updateAnswer,
     updateQuestionPoints,
