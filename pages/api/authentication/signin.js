@@ -5,11 +5,10 @@ import jsonwebtoken from "jsonwebtoken";
 import cookie from 'cookie';
  async function signIn(req, res) {
     let data = req.body;
-    console.log("data", data)
     let user = await User.findOne({username: data.username});
     console.log(user);
     if(user) {
-        const checkPassword = bcrypt.compareSync(data.password, user.password)
+        const checkPassword = bcrypt.compareSync(data.password, user.password);
         if (checkPassword) {
             const {_id,fullname, email, username,...password}=user;
             let jwt = jsonwebtoken.sign({_id}, "ntluan0301");
