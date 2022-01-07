@@ -10,7 +10,7 @@ import { chooseAnswer, getQuizz, nextQuestion, previosQuestion, previousQuestion
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { resetQuizz } from "../../redux/slices/quiz";
+import quiz, { resetQuizz } from "../../redux/slices/quiz";
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -18,6 +18,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Link from "next/link";
+import axios from "axios";
 const Play = () => {
     const router = useRouter();
     const { quizz_id } = router.query;
@@ -25,6 +26,8 @@ const Play = () => {
     const [currentQuestionOrder, setCurrentQuestionOrder] = useState(null);
     const [openDialog, setOpenDialog] = useState(false);
     const play = useSelector(state => state.play);
+    const user = useSelector(state => state.user);
+    console.log("user", user);
     const dispatch = useDispatch();
     useEffect(() => {
         if (quizz && !isLoading) dispatch(getQuizz(quizz));
@@ -38,6 +41,31 @@ const Play = () => {
     };
     const handlePreviousQuestion = () => {
         dispatch(previousQuestion());
+    };
+    const handleFinishedQuizz = async() => {
+        console.log("play", play);
+        let result = play?.listQuestions?.map((item) => {
+            const chooseAnswer = item?.answers?.find((answer) => answer.order === item?.chooseAnswer);
+            return {
+                question: item.question,
+                correctAnswer: item?.answers[item.correct],
+                chooseAnswer: {
+                    order: item?.chooseAnswer,
+                    answer: chooseAnswer?.answer
+                }
+            };
+        });
+        let report = {
+            quiz: quizz_id,
+            result:result,
+            totalScore: play?.totalScore,
+            rewardScore: play?.rewardScore,
+            user: user?._id
+        } ;
+        await axios.post("/api/reports/create", report);
+        setOpenDialog(true);
+        console.log("report", report);
+
     };
     const AnswerItem = ({ answer }) => {
         const handleChooseAnswer = () => {
@@ -89,7 +117,7 @@ const Play = () => {
             <Box mt={5}>
                 <Stack direction="row" justifyContent="space-between" mb={3}>
                     <Typography variant="h3">{play?.title}</Typography>
-                    <Button variant="contained" color="warning" onClick={() => setOpenDialog(true)}>Finish Quiz</Button>
+                    <Button variant="contained" color="warning" onClick={() => handleFinishedQuizz()}>Finish Quiz</Button>
                     <Dialog
                         open={openDialog}
                         aria-labelledby="alert-dialog-title"
